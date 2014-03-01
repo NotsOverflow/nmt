@@ -2,30 +2,35 @@ from copy import deepcopy
 from decimal import *
 getcontext().prec = 128
 
+def Test(matrix):
+	if isinstance(matrix,Matrix):
+		return True
+	return False
+
 def T(matrix):
-	if str(type(matrix)) != "<class 'MatrixTools.Matrix'>":
+	if not isinstance(matrix,Matrix) :
 		matrix = Matrix(matrix)
 	return matrix.transpose()
 
 def tr(matrix):
-	if str(type(matrix)) != "<class 'MatrixTools.Matrix'>":
+	if not isinstance(matrix,Matrix):
 		matrix = Matrix(matrix)
 	return matrix.trace()
 
 def is_ort(matrix,rounded=False):
-	if str(type(matrix)) != "<class 'MatrixTools.Matrix'>":
+	if not isinstance(matrix,Matrix):
 		matrix = Matrix(matrix)
 	return matrix.is_ort(rounded)
 
 def is_id(matrix,rounded=False):
-	if str(type(matrix)) != "<class 'MatrixTools.Matrix'>":
+	if not isinstance(matrix,Matrix):
 		matrix = Matrix(matrix)
 	return matrix.is_id(rounded)
 
 def I(matrix):
-	if str(type(matrix)) == "<class 'int'>":
+	if type(matrix) is int :
 		return Matrix([[1 if i==j else 0 for j in range(matrix)] for i in range(matrix)])
-	if str(type(matrix)) != "<class 'MatrixTools.Matrix'>":
+	if not isinstance(matrix,Matrix) :
 		matrix = Matrix(matrix)
 	return matrix.unite()
 
@@ -49,7 +54,7 @@ class Matrix():
 		
 		
 	def __add__(self,b):
-		if str(type(b)) != "<class 'MatrixTools.Matrix'>":
+		if not isinstance(b,Matrix):
 			raise ExceptionMatrice("The action you try to achieve is not possible at the moment ...")
 		if self.nb_lignes != b.nb_lignes or self.nb_cols != b.nb_cols:
 			raise ExceptionMatrice("The matrixs you're using are not compatible")
@@ -57,15 +62,15 @@ class Matrix():
 			return Matrix([[self.matrix[i][j] + b.matrix[i][j] for j in self.nb_cols] for i in self.nb_lignes])
 
 	def __mul__(self,b):
-		if str(type(b)) == "<class 'decimal.Decimal'>" \
-		or str(type(b)) == "<class 'int'>" \
-		or str(type(b)) == "<class 'float'>":
+		if isinstance(b,Decimal) \
+		or type(b) is int \
+		or type(b) is float:
 			return self.mprod_scal(Decimal(str(b)))
-		if str(type(b)) == "<class 'MatrixTools.Matrix'>":
+		if isinstance(b,Matrix) :
 			return self.mprod(b)
 		
 	def __sub__(self,b):
-		if str(type(b)) != "<class 'MatrixTools.Matrix'>":
+		if not isinstance(b,Matrix):
 			raise ExceptionMatrice("The action you try to achieve is not possible at the moment ...")
 		if self.nb_lignes != b.nb_lignes or self.nb_cols != b.nb_cols:
 			raise ExceptionMatrice("The matrixs you're using are not compatible")
@@ -89,11 +94,11 @@ class Matrix():
 		return pA
 
 	def __div__(self,b):
-		if str(type(b)) == "<class 'decimal.Decimal'>" \
-		or str(type(b)) == "<class 'int'>" \
-		or str(type(b)) == "<class 'float'>":
+		if isinstance(b,Decimal) \
+		or type(b) is int \
+		or type(b) is float:
 			return self.mdiv_scal(Decimal(str(b)))
-		if str(type(b)) == "<class 'MatrixTools.Matrix'>":
+		if isinstance(b,Matrix):
 			return self.mdiv(b)	
 		
 	def __str__(self):
@@ -113,7 +118,7 @@ class Matrix():
 	'''	
 	
 	def mdiv(self,b):
-		if str(type(b)) != "<class 'MatrixTools.Matrix'>" \
+		if not isinstance(b,Matrix) \
 		or self.nb_cols != b.nb_lignes:
 			raise ExceptionMatrice("The matrixs you're using are not compatible")
 		tb = T(b)
@@ -128,7 +133,7 @@ class Matrix():
 		
 	
 	def mprod(self,b):
-		if str(type(b)) != "<class 'MatrixTools.Matrix'>" \
+		if not isinstance(b,Matrix) \
 		or self.nb_cols != b.nb_lignes:
 			raise ExceptionMatrice("The matrixs you're using are not compatible")
 		tb = T(b)
@@ -187,10 +192,10 @@ class Matrix():
 		return Matrix([[k * self.matrix[i][j] for j in self.nb_cols] for i in self.nb_lignes])
 
 	def setM(self):
-		if str(type(self.matrix)) != "<class 'list'>":
-			if str(type(self.csv_str)) == "<class 'str'>":
+		if type(self.matrix) is not list:
+			if type(self.csv_str) is str:
 				self.matrix = [ elem.split(',') for elem in str(self.csv_str).split("\n") ]
-			elif str(type(self.csv_file)) == "<class 'str'>":
+			elif type(self.csv_file) is str :
 				try:
 					with open(self.csv_file,'r') as f:
 						self.matrix = [ligne.split(',') for ligne in f]
@@ -198,11 +203,11 @@ class Matrix():
 					raise ExceptionMatrice("Can't open csv file")
 			else:
 				raise ExceptionMatrice("Nothing to reset")
-		if self.matrix == [] or str(type(self.matrix[0])) != "<class 'list'>" or self.matrix[0] == []:
+		if self.matrix == [] or type(self.matrix[0]) is not list or self.matrix[0] == []:
 			raise ExceptionMatrice("Empty Matrix")
 		if self.rounded != False:
 			self.matrix = [ [round(float(elem),int(self.rounded)) for elem in row] for row in self.matrix ]
-		if str(type(self.matrix[0][0])) != "<class 'decimal.Decimal'>" \
+		if type(self.matrix[0][0]) is not Decimal \
 		and self.unpecise == False:
 			self.matrix = [ [Decimal(str(elem)) for elem in row] for row in self.matrix ]
 		self.nb_lignes = self.lignes()
@@ -211,11 +216,11 @@ class Matrix():
 		and self.unpecise == True:
 			for i in self.nb_lignes:
 				for j in self.cols:
-					if str(type(self.matrix[i][j])) == "<class 'decimal.Decimal'>":
+					if type(self.matrix[i][j]) is Decimal:
 						self.matrix[i][j] = float(self.matrix[i][j])
-					if str(type(self.matrix[i][j])) != "<class 'int'>" \
-					or str(type(self.matrix[i][j])) != "<class 'float'>" \
-					or str(type(self.matrix[i][j])) != "<class 'str'>" :
+					if type(self.matrix[i][j]) is not int \
+					or type(self.matrix[i][j]) is not float \
+					or type(self.matrix[i][j]) is not str :
 						raise ExceptionMatrice("Not valide values")
 	
 	def lignes(self):
